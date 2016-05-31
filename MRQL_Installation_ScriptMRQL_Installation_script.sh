@@ -53,7 +53,8 @@ fi
 # Start Hadoop Configurations
 
 # 1- Replace Hadoop version with the version installed on the system
-# 2- Replace the namenode URL
+# 2- Replace Hadoop home path
+# 3- Replace the namenode URL
 
 HADOOP_HOME=${HADOOP_PREFIX} # TODO: Find some other way to figure this out
 HADOOP_VERSION=${HADOOP_HOME##/*/} # Parse the path to get just the version e.g hadoop-2.7.0
@@ -66,12 +67,22 @@ HADOOP_VERSION_TO_REPLACE=2.7.1
 # Replace the Hadoop version with the version Found on the system
 sed -i -e "s/$HADOOP_VERSION_TO_REPLACE/$HADOOP_VERSION/g" $MRQL_HOME/conf/mrql-env.sh
 
+
+# Replace Hadoop Home path
+HADOOP_HOME_REPLACE='${HOME}/hadoop-${HADOOP_VERSION}'
+echo $HADOOP_HOME_REPLACE
+sed -i -e 's~'$HADOOP_HOME_REPLACE'~'$HADOOP_HOME'~g' $MRQL_HOME/conf/mrql-env.sh
+# sed -i -e "s~$HADOOP_HOME_REPLACE~123~g"
+   
+
 # Replace namenode URL
 DEFAULT_MRQL_FS_DEFAULT_NAME=localhost:9000
 MY_FS_DEFAULT_NAME=localhost:54310 # TODO: Ask what to do
 sed -i -e "s/$DEFAULT_MRQL_FS_DEFAULT_NAME/$MY_FS_DEFAULT_NAME/g" $MRQL_HOME/conf/mrql-env.sh
 
 # Hadoop configurations complate
+
+
 
 # Start HAMA Configurations
 
