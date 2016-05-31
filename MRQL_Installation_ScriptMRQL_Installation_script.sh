@@ -8,18 +8,17 @@ MRQL_HOME=$MRQL_INSTALL_FOLDER'/apache-mrql-0.9.6-incubating'
 
 # Download the MRQL Tarball to a specific folder
 # TODO: Checksum required ?
-#wget -P ${MRQL_INSTALL_FOLDER} "${MRQL_TARBALL_URL}"
+wget -P ${MRQL_INSTALL_FOLDER} "${MRQL_TARBALL_URL}"
 
 #wget "${MRQL_TARBALL_URI}"
 #wget -P /Users/raja/Documents/GSoC/MRQL_Installation_Script/script_test_folder/  "${MRQL_TARBALL_URI}"
 
 download_message='Apache MEQL downloaded successfully at '${MRQL_INSTALL_FOLDER}
-#download_message=$download_message${MRQL_INSTALL_FOLDER}
 echo $download_message
 #echo 'Apache MRQL downloaded successfully at' + ${MRQL_INSTALL_FOLDER}
 
 # Unzip the tarball
-#tar xvfz ${MRQL_INSTALL_FOLDER}/apache-mrql-*.tar.gz -C ${MRQL_INSTALL_FOLDER}
+tar xvfz ${MRQL_INSTALL_FOLDER}/apache-mrql-*.tar.gz -C ${MRQL_INSTALL_FOLDER}
 
 echo 'File:  unzipped successfully'
 
@@ -55,14 +54,24 @@ fi
 echo '--------------- JAR(s) checking complete ---------------------'
 echo ' '
 
-# --------------- Start Hadoop Configurations -----------------
+
+echo '--------------- Modifying Java -------------------------------'
+
+# Replace java home
+JAVA_HOME_TO_REPLACE=/usr/lib/jvm/java-8-oracle
+sed -i -e 's~'$JAVA_HOME_TO_REPLACE'~'${JAVA_HOME}'~g' $MRQL_HOME/conf/mrql-env.sh
+
+echo 'JAVA_HOME changed successfully to '${JAVA_HOME}
+
+echo '--------------- Java modification complete -------------------'
+
+
+echo ' '
+echo '--------------- Starting Hadoop Configurations ---------------'
 
 # 1- Replace Hadoop version with the version installed on the system
 # 2- Replace Hadoop home path
 # 3- Replace the namenode URL
-
-echo ' '
-echo '--------------- Starting Hadoop Configurations ---------------'
 
 HADOOP_HOME=${HADOOP_PREFIX} # TODO: Find some other way to figure this out
 HADOOP_VERSION=${HADOOP_HOME##/*/} # Parse the path to get just the version e.g hadoop-2.7.0
@@ -97,6 +106,9 @@ echo '--------------- Hadoop configurations complete ---------------'
 echo ' '
 echo '--------------- Starting HAMA Configurations -----------------'
 
+# 1- Replace HAMA_VERSION
+# 2- Replace HAMA_HOME
+
 HAMA_HOME=${HAMA_HOME} # TODO:
 HAMA_VERSION=${HAMA_HOME##/*/} # Parse the path to get the version
 HAMA_VERSION=${HAMA_VERSION/hama-/} # Parse the word 'hama-' from the string to get 0.7.1
@@ -108,7 +120,7 @@ HAMA_VERSION_TO_REPLACE=0.7.0
 # Replace the Hama version with the version found on the system
 sed -i -e "s/$HAMA_VERSION_TO_REPLACE/$HAMA_VERSION/g" $MRQL_HOME/conf/mrql-env.sh
 
-echo 'HAMA_VERSION changed successfully from '$HAMA_VERSION_TO_REPLACE' to'$HAMA_VERSION' in mrql.env.sh'
+echo 'HAMA_VERSION changed successfully from '$HAMA_VERSION_TO_REPLACE' to '$HAMA_VERSION' in mrql.env.sh'
 
 # Replace Hama home path
 HAMA_HOME_REPLACE='${HOME}/hama-${HAMA_VERSION}'
@@ -118,21 +130,6 @@ echo 'HAMA_HOME changed successfully in mrql.env.sh'
 
 echo '--------------- End HAMA Configurations ----------------------'
 echo ' '
-
-echo '--------------- Modifying Java -------------------------------'
-
-# Replace java home
-JAVA_HOME_TO_REPLACE=/usr/lib/jvm/java-8-oracle
-sed -i -e 's~'$JAVA_HOME_TO_REPLACE'~'${JAVA_HOME}'~g' $MRQL_HOME/conf/mrql-env.sh
-
-echo 'JAVA_HOME changed successfully to '${JAVA_HOME}
-
-if [[ !(-f ${JAVA_HOME}) ]]; then
-    echo 'INSIDE IF '$JAVA_HOME
-    export JAVA_HOME=/usr/lib/jvm/java-8-oracle
-fi
-
-echo '--------------- Java modification complete'
 
 echo ' EXECUTING COMMAND'
 $MRQL_HOME/bin/mrql.bsp -dist -nodes 50 $MRQL_HOME/queries/pagerank.mrql
