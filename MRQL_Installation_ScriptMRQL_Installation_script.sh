@@ -66,7 +66,7 @@ echo '--------------- Starting Hadoop Configurations ---------------'
 
 HADOOP_HOME=${HADOOP_PREFIX} # TODO: Find some other way to figure this out
 HADOOP_VERSION=${HADOOP_HOME##/*/} # Parse the path to get just the version e.g hadoop-2.7.0
-HADOOP_VERSION=${HADOOP_VERSION/hadoop-/} # Parse the word 'hadoop-' from the strong to get 2.7.0
+HADOOP_VERSION=${HADOOP_VERSION/hadoop-/} # Parse the word 'hadoop-' from the string to get 2.7.0
 
 echo 'Hadoop version found : '${HADOOP_VERSION}
 
@@ -97,9 +97,46 @@ echo '--------------- Hadoop configurations complete ---------------'
 echo ' '
 echo '--------------- Starting HAMA Configurations -----------------'
 
+HAMA_HOME=${HAMA_HOME} # TODO:
+HAMA_VERSION=${HAMA_HOME##/*/} # Parse the path to get the version
+HAMA_VERSION=${HAMA_VERSION/hama-/} # Parse the word 'hama-' from the string to get 0.7.1
 
+echo 'HAMA version found : '$HAMA_VERSION
+
+HAMA_VERSION_TO_REPLACE=0.7.0
+
+# Replace the Hama version with the version found on the system
+sed -i -e "s/$HAMA_VERSION_TO_REPLACE/$HAMA_VERSION/g" $MRQL_HOME/conf/mrql-env.sh
+
+echo 'HAMA_VERSION changed successfully from '$HAMA_VERSION_TO_REPLACE' to'$HAMA_VERSION' in mrql.env.sh'
+
+# Replace Hama home path
+HAMA_HOME_REPLACE='${HOME}/hama-${HAMA_VERSION}'
+sed -i -e 's~'$HAMA_HOME_REPLACE'~'$HAMA_HOME'~g' $MRQL_HOME/conf/mrql-env.sh
+
+echo 'HAMA_HOME changed successfully in mrql.env.sh'
 
 echo '--------------- End HAMA Configurations ----------------------'
 echo ' '
+
+echo '--------------- Modifying Java -------------------------------'
+
+# Replace java home
+JAVA_HOME_TO_REPLACE=/usr/lib/jvm/java-8-oracle
+sed -i -e 's~'$JAVA_HOME_TO_REPLACE'~'${JAVA_HOME}'~g' $MRQL_HOME/conf/mrql-env.sh
+
+echo 'JAVA_HOME changed successfully to '${JAVA_HOME}
+
+if [[ !(-f ${JAVA_HOME}) ]]; then
+    echo 'INSIDE IF '$JAVA_HOME
+    export JAVA_HOME=/usr/lib/jvm/java-8-oracle
+fi
+
+echo '--------------- Java modification complete'
+
+echo ' EXECUTING COMMAND'
+$MRQL_HOME/bin/mrql.bsp -dist -nodes 50 $MRQL_HOME/queries/pagerank.mrql
+
+
 # LATER on update the spark /flink version
 
