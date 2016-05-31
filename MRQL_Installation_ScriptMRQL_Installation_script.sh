@@ -6,6 +6,8 @@ MRQL_INSTALL_FOLDER='/Users/raja/Documents/GSoC/MRQL_Installation_Script/script_
 MRQL_TARBALL_URL='http://mirrors.ae-online.de/apache/incubator/mrql/apache-mrql-0.9.6-incubating/apache-mrql-0.9.6-incubating-bin.tar.gz'
 MRQL_HOME=$MRQL_INSTALL_FOLDER'/apache-mrql-0.9.6-incubating'
 
+function downloadMRQL {
+
 # Download the MRQL Tarball to a specific folder
 # TODO: Checksum required ?
 wget -P ${MRQL_INSTALL_FOLDER} "${MRQL_TARBALL_URL}"
@@ -17,10 +19,18 @@ download_message='Apache MEQL downloaded successfully at '${MRQL_INSTALL_FOLDER}
 echo $download_message
 #echo 'Apache MRQL downloaded successfully at' + ${MRQL_INSTALL_FOLDER}
 
+}
+
+function unzipMRQL {
+
 # Unzip the tarball
 tar xvfz ${MRQL_INSTALL_FOLDER}/apache-mrql-*.tar.gz -C ${MRQL_INSTALL_FOLDER}
 
 echo 'File:  unzipped successfully'
+
+}
+
+function configureJarsRequiredByMRQL {
 
 echo ' '
 echo '--------------- Checking/Downloading JAR(s) required by MRQL -------------'
@@ -51,9 +61,13 @@ else
     wget -P $JLINE_JAR_PATH "${JLINE_JAR_DOWNLOAD_URL}"
 fi
 # end jline check
+
+}
+
+function configureJava {
+
 echo '--------------- JAR(s) checking complete ---------------------'
 echo ' '
-
 
 echo '--------------- Modifying Java -------------------------------'
 
@@ -65,7 +79,9 @@ echo 'JAVA_HOME changed successfully to '${JAVA_HOME}
 
 echo '--------------- Java modification complete -------------------'
 
+}
 
+function configureHadoop {
 echo ' '
 echo '--------------- Starting Hadoop Configurations ---------------'
 
@@ -101,7 +117,10 @@ sed -i -e "s/$DEFAULT_MRQL_FS_DEFAULT_NAME/$MY_FS_DEFAULT_NAME/g" $MRQL_HOME/con
 
 echo 'FS_DEFAULT_NAME changed successfully in mrql.env.sh'
 echo '--------------- Hadoop configurations complete ---------------'
+}
 
+
+function configureHama {
 
 echo ' '
 echo '--------------- Starting HAMA Configurations -----------------'
@@ -131,9 +150,22 @@ echo 'HAMA_HOME changed successfully in mrql.env.sh'
 echo '--------------- End HAMA Configurations ----------------------'
 echo ' '
 
-echo ' EXECUTING COMMAND'
-$MRQL_HOME/bin/mrql.bsp -dist -nodes 50 $MRQL_HOME/queries/pagerank.mrql
+}
 
+function executeCommands {
+
+echo ' EXECUTING COMMAND'
+#$MRQL_HOME/bin/mrql.bsp -dist -nodes 50 $MRQL_HOME/queries/pagerank.mrql
+
+}
+
+downloadMRQL
+unzipMRQL
+configureJarsRequiredByMRQL
+configureJava
+configureHadoop
+configureHama
+executeCommands
 
 # LATER on update the spark /flink version
 
