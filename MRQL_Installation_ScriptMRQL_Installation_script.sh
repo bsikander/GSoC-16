@@ -23,6 +23,9 @@ echo $download_message
 
 echo 'File:  unzipped successfully'
 
+echo ' '
+echo '--------------- Checking/Downloading JAR(s) required by MRQL -------------'
+
 # Check if java-cup-11a.jar exists
 CUP_JAR_PATH=${HOME}/.m2/repository/net/sf/squirrel-sql/thirdparty/non-maven/java-cup/11a/
 CUP_JAR_NAME=java-cup-11a.jar
@@ -49,12 +52,17 @@ else
     wget -P $JLINE_JAR_PATH "${JLINE_JAR_DOWNLOAD_URL}"
 fi
 # end jline check
+echo '--------------- JAR(s) checking complete ---------------------'
+echo ' '
 
-# Start Hadoop Configurations
+# --------------- Start Hadoop Configurations -----------------
 
 # 1- Replace Hadoop version with the version installed on the system
 # 2- Replace Hadoop home path
 # 3- Replace the namenode URL
+
+echo ' '
+echo '--------------- Starting Hadoop Configurations ---------------'
 
 HADOOP_HOME=${HADOOP_PREFIX} # TODO: Find some other way to figure this out
 HADOOP_VERSION=${HADOOP_HOME##/*/} # Parse the path to get just the version e.g hadoop-2.7.0
@@ -67,25 +75,31 @@ HADOOP_VERSION_TO_REPLACE=2.7.1
 # Replace the Hadoop version with the version Found on the system
 sed -i -e "s/$HADOOP_VERSION_TO_REPLACE/$HADOOP_VERSION/g" $MRQL_HOME/conf/mrql-env.sh
 
+echo 'Hadoop version changed successfully in mrql-env.sh'
 
 # Replace Hadoop Home path
 HADOOP_HOME_REPLACE='${HOME}/hadoop-${HADOOP_VERSION}'
-echo $HADOOP_HOME_REPLACE
+
 sed -i -e 's~'$HADOOP_HOME_REPLACE'~'$HADOOP_HOME'~g' $MRQL_HOME/conf/mrql-env.sh
 # sed -i -e "s~$HADOOP_HOME_REPLACE~123~g"
-   
+
+echo 'HADOOP_HOME changed successfully in mrql-env.sh'
 
 # Replace namenode URL
 DEFAULT_MRQL_FS_DEFAULT_NAME=localhost:9000
 MY_FS_DEFAULT_NAME=localhost:54310 # TODO: Ask what to do
 sed -i -e "s/$DEFAULT_MRQL_FS_DEFAULT_NAME/$MY_FS_DEFAULT_NAME/g" $MRQL_HOME/conf/mrql-env.sh
 
-# Hadoop configurations complate
+echo 'FS_DEFAULT_NAME changed successfully in mrql.env.sh'
+echo '--------------- Hadoop configurations complete ---------------'
+
+
+echo ' '
+echo '--------------- Starting HAMA Configurations -----------------'
 
 
 
-# Start HAMA Configurations
-
-
+echo '--------------- End HAMA Configurations ----------------------'
+echo ' '
 # LATER on update the spark /flink version
 
