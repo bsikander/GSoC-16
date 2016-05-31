@@ -62,12 +62,12 @@ function configureJarsRequiredByMRQL {
     fi
     # end jline check
 
+    echo '--------------- JAR(s) checking complete ---------------------'
+    echo ' '
+
 }
 
 function configureJava {
-
-    echo '--------------- JAR(s) checking complete ---------------------'
-    echo ' '
 
     echo '--------------- Modifying Java -------------------------------'
 
@@ -81,7 +81,7 @@ function configureJava {
 
 }
 
-function configureHadoop {
+function configureHadoopConfigurations {
     
     echo ' '
     echo '--------------- Starting Hadoop Configurations ---------------'
@@ -121,7 +121,7 @@ function configureHadoop {
 }
 
 
-function configureHama {
+function configureHamaConfigurations {
 
     echo ' '
     echo '--------------- Starting HAMA Configurations -----------------'
@@ -164,8 +164,8 @@ downloadMRQL
 unzipMRQL
 configureJarsRequiredByMRQL
 configureJava
-configureHadoop
-configureHama
+configureHadoopConfigurations
+configureHamaConfigurations
 executeCommands
 
 # LATER on update the spark /flink version
