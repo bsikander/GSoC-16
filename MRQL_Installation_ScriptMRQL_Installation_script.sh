@@ -4,6 +4,7 @@ MRQL_INSTALL_FOLDER='/Users/raja/Documents/GSoC/MRQL_Installation_Script/script_
 
 # URL for Apache MRQL tarball download
 MRQL_TARBALL_URL='http://mirrors.ae-online.de/apache/incubator/mrql/apache-mrql-0.9.6-incubating/apache-mrql-0.9.6-incubating-bin.tar.gz'
+MRQL_HOME=$MRQL_INSTALL_FOLDER'/apache-mrql-0.9.6-incubating'
 
 # Download the MRQL Tarball to a specific folder
 # TODO: Checksum required ?
@@ -49,8 +50,31 @@ else
 fi
 # end jline check
 
-# CHECK if CUP JAR exists
-# CHECK if JLine JAR exists
-# UPDATE hadoop version and HAMA version initially
+# Start Hadoop Configurations
+
+# 1- Replace Hadoop version with the version installed on the system
+# 2- Replace the namenode URL
+
+HADOOP_HOME=${HADOOP_PREFIX} # TODO: Find some other way to figure this out
+HADOOP_VERSION=${HADOOP_HOME##/*/} # Parse the path to get just the version e.g hadoop-2.7.0
+HADOOP_VERSION=${HADOOP_VERSION/hadoop-/} # Parse the word 'hadoop-' from the strong to get 2.7.0
+
+echo 'Hadoop version found : '${HADOOP_VERSION}
+
+HADOOP_VERSION_TO_REPLACE=2.7.1
+
+# Replace the Hadoop version with the version Found on the system
+sed -i -e "s/$HADOOP_VERSION_TO_REPLACE/$HADOOP_VERSION/g" $MRQL_HOME/conf/mrql-env.sh
+
+# Replace namenode URL
+DEFAULT_MRQL_FS_DEFAULT_NAME=localhost:9000
+MY_FS_DEFAULT_NAME=localhost:54310 # TODO: Ask what to do
+sed -i -e "s/$DEFAULT_MRQL_FS_DEFAULT_NAME/$MY_FS_DEFAULT_NAME/g" $MRQL_HOME/conf/mrql-env.sh
+
+# Hadoop configurations complate
+
+# Start HAMA Configurations
+
+
 # LATER on update the spark /flink version
 
