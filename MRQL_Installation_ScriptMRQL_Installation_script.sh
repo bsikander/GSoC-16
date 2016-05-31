@@ -11,7 +11,10 @@ wget -P ${MRQL_INSTALL_FOLDER} "${MRQL_TARBALL_URI}"
 #wget "${MRQL_TARBALL_URI}"
 #wget -P /Users/raja/Documents/GSoC/MRQL_Installation_Script/script_test_folder/  "${MRQL_TARBALL_URI}"
 
-echo 'Apache MRQL downloaded successfully at ${MRQL_INSTALL_FOLDER}'
+download_message='Apache MEQL downloaded successfully at '
+download_message=$download_message $MRQL_INSTALL_FOLDER
+echo $download_message
+#echo 'Apache MRQL downloaded successfully at' + ${MRQL_INSTALL_FOLDER}
 
 # Unzip the tarball
 tar xvfz ${MRQL_INSTALL_FOLDER}/apache-mrql-*.tar.gz -C ${MRQL_INSTALL_FOLDER}
