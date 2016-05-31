@@ -8,154 +8,155 @@ MRQL_HOME=$MRQL_INSTALL_FOLDER'/apache-mrql-0.9.6-incubating'
 
 function downloadMRQL {
 
-# Download the MRQL Tarball to a specific folder
-# TODO: Checksum required ?
-wget -P ${MRQL_INSTALL_FOLDER} "${MRQL_TARBALL_URL}"
+    # Download the MRQL Tarball to a specific folder
+    # TODO: Checksum required ?
+    wget -P ${MRQL_INSTALL_FOLDER} "${MRQL_TARBALL_URL}"
 
-#wget "${MRQL_TARBALL_URI}"
-#wget -P /Users/raja/Documents/GSoC/MRQL_Installation_Script/script_test_folder/  "${MRQL_TARBALL_URI}"
+    #wget "${MRQL_TARBALL_URI}"
+    #wget -P /Users/raja/Documents/GSoC/MRQL_Installation_Script/script_test_folder/  "${MRQL_TARBALL_URI}"
 
-download_message='Apache MEQL downloaded successfully at '${MRQL_INSTALL_FOLDER}
-echo $download_message
-#echo 'Apache MRQL downloaded successfully at' + ${MRQL_INSTALL_FOLDER}
+    download_message='Apache MEQL downloaded successfully at '${MRQL_INSTALL_FOLDER}
+    echo $download_message
+    #echo 'Apache MRQL downloaded successfully at' + ${MRQL_INSTALL_FOLDER}
 
 }
 
 function unzipMRQL {
 
-# Unzip the tarball
-tar xvfz ${MRQL_INSTALL_FOLDER}/apache-mrql-*.tar.gz -C ${MRQL_INSTALL_FOLDER}
+    # Unzip the tarball
+    tar xvfz ${MRQL_INSTALL_FOLDER}/apache-mrql-*.tar.gz -C ${MRQL_INSTALL_FOLDER}
 
-echo 'File:  unzipped successfully'
+    echo 'File:  unzipped successfully'
 
 }
 
 function configureJarsRequiredByMRQL {
 
-echo ' '
-echo '--------------- Checking/Downloading JAR(s) required by MRQL -------------'
+    echo ' '
+    echo '--------------- Checking/Downloading JAR(s) required by MRQL -------------'
 
-# Check if java-cup-11a.jar exists
-CUP_JAR_PATH=${HOME}/.m2/repository/net/sf/squirrel-sql/thirdparty/non-maven/java-cup/11a/
-CUP_JAR_NAME=java-cup-11a.jar
+    # Check if java-cup-11a.jar exists
+    CUP_JAR_PATH=${HOME}/.m2/repository/net/sf/squirrel-sql/thirdparty/non-maven/java-cup/11a/
+    CUP_JAR_NAME=java-cup-11a.jar
 
-if [ -e $CUP_JAR_PATH$CUP_JAR_NAME ]
-then
-    echo $CUP_JAR_NAME" file exists"
-else
-    CUP_JAR_DOWNLOAD_URL=http://www2.cs.tum.edu/projects/cup/releases/java-cup-11a.jar
-    echo $CUP_JAR_NAME" file is missing. Downloading from http://www2.cs.tum.edu/projects/cup/"
-    wget -P $CUP_JAR_PATH "${CUP_JAR_DOWNLOAD_URL}" 
-fi
-# end cup jar check
+    if [ -e $CUP_JAR_PATH$CUP_JAR_NAME ]
+    then
+        echo $CUP_JAR_NAME" file exists"
+    else
+        CUP_JAR_DOWNLOAD_URL=http://www2.cs.tum.edu/projects/cup/releases/java-cup-11a.jar
+        echo $CUP_JAR_NAME" file is missing. Downloading from http://www2.cs.tum.edu/projects/cup/"
+        wget -P $CUP_JAR_PATH "${CUP_JAR_DOWNLOAD_URL}" 
+    fi
+    # end cup jar check
 
-# Check if jline-1.0.jar exists in maven repository
-JLINE_JAR_PATH=${HOME}/.m2/repository/jline/jline/1.0/
-JLINE_JAR_NAME=jline-1.0.jar
-if [ -e $JLINE_JAR_PATH$JLINE_JAR_NAME ]
-then
-    echo ${JLINE_JAR_NAME}" file exists"
-else
-    echo ${JLINE_JAR_NAME}" file is missing. Downloading from http://jline.sourceforge.net"
-    JLINE_JAR_DOWNLOAD_URL=https://sourceforge.net/projects/jline/files/jline/1.0/jline-1.0.zip
-    wget -P $JLINE_JAR_PATH "${JLINE_JAR_DOWNLOAD_URL}"
-fi
-# end jline check
+    # Check if jline-1.0.jar exists in maven repository
+    JLINE_JAR_PATH=${HOME}/.m2/repository/jline/jline/1.0/
+    JLINE_JAR_NAME=jline-1.0.jar
+    if [ -e $JLINE_JAR_PATH$JLINE_JAR_NAME ]
+    then
+        echo ${JLINE_JAR_NAME}" file exists"
+    else
+        echo ${JLINE_JAR_NAME}" file is missing. Downloading from http://jline.sourceforge.net"
+        JLINE_JAR_DOWNLOAD_URL=https://sourceforge.net/projects/jline/files/jline/1.0/jline-1.0.zip
+        wget -P $JLINE_JAR_PATH "${JLINE_JAR_DOWNLOAD_URL}"
+    fi
+    # end jline check
 
 }
 
 function configureJava {
 
-echo '--------------- JAR(s) checking complete ---------------------'
-echo ' '
+    echo '--------------- JAR(s) checking complete ---------------------'
+    echo ' '
 
-echo '--------------- Modifying Java -------------------------------'
+    echo '--------------- Modifying Java -------------------------------'
 
-# Replace java home
-JAVA_HOME_TO_REPLACE=/usr/lib/jvm/java-8-oracle
-sed -i -e 's~'$JAVA_HOME_TO_REPLACE'~'${JAVA_HOME}'~g' $MRQL_HOME/conf/mrql-env.sh
+    # Replace java home
+    JAVA_HOME_TO_REPLACE=/usr/lib/jvm/java-8-oracle
+    sed -i -e 's~'$JAVA_HOME_TO_REPLACE'~'${JAVA_HOME}'~g' $MRQL_HOME/conf/mrql-env.sh
 
-echo 'JAVA_HOME changed successfully to '${JAVA_HOME}
+    echo 'JAVA_HOME changed successfully to '${JAVA_HOME}
 
-echo '--------------- Java modification complete -------------------'
+    echo '--------------- Java modification complete -------------------'
 
 }
 
 function configureHadoop {
-echo ' '
-echo '--------------- Starting Hadoop Configurations ---------------'
+    
+    echo ' '
+    echo '--------------- Starting Hadoop Configurations ---------------'
 
-# 1- Replace Hadoop version with the version installed on the system
-# 2- Replace Hadoop home path
-# 3- Replace the namenode URL
+    # 1- Replace Hadoop version with the version installed on the system
+    # 2- Replace Hadoop home path
+    # 3- Replace the namenode URL
 
-HADOOP_HOME=${HADOOP_PREFIX} # TODO: Find some other way to figure this out
-HADOOP_VERSION=${HADOOP_HOME##/*/} # Parse the path to get just the version e.g hadoop-2.7.0
-HADOOP_VERSION=${HADOOP_VERSION/hadoop-/} # Parse the word 'hadoop-' from the string to get 2.7.0
+    HADOOP_HOME=${HADOOP_PREFIX} # TODO: Find some other way to figure this out
+    HADOOP_VERSION=${HADOOP_HOME##/*/} # Parse the path to get just the version e.g hadoop-2.7.0
+    HADOOP_VERSION=${HADOOP_VERSION/hadoop-/} # Parse the word 'hadoop-' from the string to get 2.7.0
 
-echo 'Hadoop version found : '${HADOOP_VERSION}
+    echo 'Hadoop version found : '${HADOOP_VERSION}
 
-HADOOP_VERSION_TO_REPLACE=2.7.1
+    HADOOP_VERSION_TO_REPLACE=2.7.1
 
-# Replace the Hadoop version with the version Found on the system
-sed -i -e "s/$HADOOP_VERSION_TO_REPLACE/$HADOOP_VERSION/g" $MRQL_HOME/conf/mrql-env.sh
+    # Replace the Hadoop version with the version Found on the system
+    sed -i -e "s/$HADOOP_VERSION_TO_REPLACE/$HADOOP_VERSION/g" $MRQL_HOME/conf/mrql-env.sh
 
-echo 'Hadoop version changed successfully in mrql-env.sh'
+    echo 'Hadoop version changed successfully in mrql-env.sh'
 
-# Replace Hadoop Home path
-HADOOP_HOME_REPLACE='${HOME}/hadoop-${HADOOP_VERSION}'
+    # Replace Hadoop Home path
+    HADOOP_HOME_REPLACE='${HOME}/hadoop-${HADOOP_VERSION}'
 
-sed -i -e 's~'$HADOOP_HOME_REPLACE'~'$HADOOP_HOME'~g' $MRQL_HOME/conf/mrql-env.sh
-# sed -i -e "s~$HADOOP_HOME_REPLACE~123~g"
+    sed -i -e 's~'$HADOOP_HOME_REPLACE'~'$HADOOP_HOME'~g' $MRQL_HOME/conf/mrql-env.sh
+    # sed -i -e "s~$HADOOP_HOME_REPLACE~123~g"
 
-echo 'HADOOP_HOME changed successfully in mrql-env.sh'
+    echo 'HADOOP_HOME changed successfully in mrql-env.sh'
 
-# Replace namenode URL
-DEFAULT_MRQL_FS_DEFAULT_NAME=localhost:9000
-MY_FS_DEFAULT_NAME=localhost:54310 # TODO: Ask what to do
-sed -i -e "s/$DEFAULT_MRQL_FS_DEFAULT_NAME/$MY_FS_DEFAULT_NAME/g" $MRQL_HOME/conf/mrql-env.sh
+    # Replace namenode URL
+    DEFAULT_MRQL_FS_DEFAULT_NAME=localhost:9000
+    MY_FS_DEFAULT_NAME=localhost:54310 # TODO: Ask what to do
+    sed -i -e "s/$DEFAULT_MRQL_FS_DEFAULT_NAME/$MY_FS_DEFAULT_NAME/g" $MRQL_HOME/conf/mrql-env.sh
 
-echo 'FS_DEFAULT_NAME changed successfully in mrql.env.sh'
-echo '--------------- Hadoop configurations complete ---------------'
+    echo 'FS_DEFAULT_NAME changed successfully in mrql.env.sh'
+    echo '--------------- Hadoop configurations complete ---------------'
 }
 
 
 function configureHama {
 
-echo ' '
-echo '--------------- Starting HAMA Configurations -----------------'
+    echo ' '
+    echo '--------------- Starting HAMA Configurations -----------------'
 
-# 1- Replace HAMA_VERSION
-# 2- Replace HAMA_HOME
+    # 1- Replace HAMA_VERSION
+    # 2- Replace HAMA_HOME
 
-HAMA_HOME=${HAMA_HOME} # TODO:
-HAMA_VERSION=${HAMA_HOME##/*/} # Parse the path to get the version
-HAMA_VERSION=${HAMA_VERSION/hama-/} # Parse the word 'hama-' from the string to get 0.7.1
+    HAMA_HOME=${HAMA_HOME} # TODO:
+    HAMA_VERSION=${HAMA_HOME##/*/} # Parse the path to get the version
+    HAMA_VERSION=${HAMA_VERSION/hama-/} # Parse the word 'hama-' from the string to get 0.7.1
 
-echo 'HAMA version found : '$HAMA_VERSION
+    echo 'HAMA version found : '$HAMA_VERSION
 
-HAMA_VERSION_TO_REPLACE=0.7.0
+    HAMA_VERSION_TO_REPLACE=0.7.0
 
-# Replace the Hama version with the version found on the system
-sed -i -e "s/$HAMA_VERSION_TO_REPLACE/$HAMA_VERSION/g" $MRQL_HOME/conf/mrql-env.sh
+    # Replace the Hama version with the version found on the system
+    sed -i -e "s/$HAMA_VERSION_TO_REPLACE/$HAMA_VERSION/g" $MRQL_HOME/conf/mrql-env.sh
 
-echo 'HAMA_VERSION changed successfully from '$HAMA_VERSION_TO_REPLACE' to '$HAMA_VERSION' in mrql.env.sh'
+    echo 'HAMA_VERSION changed successfully from '$HAMA_VERSION_TO_REPLACE' to '$HAMA_VERSION' in mrql.env.sh'
 
-# Replace Hama home path
-HAMA_HOME_REPLACE='${HOME}/hama-${HAMA_VERSION}'
-sed -i -e 's~'$HAMA_HOME_REPLACE'~'$HAMA_HOME'~g' $MRQL_HOME/conf/mrql-env.sh
+    # Replace Hama home path
+    HAMA_HOME_REPLACE='${HOME}/hama-${HAMA_VERSION}'
+    sed -i -e 's~'$HAMA_HOME_REPLACE'~'$HAMA_HOME'~g' $MRQL_HOME/conf/mrql-env.sh
 
-echo 'HAMA_HOME changed successfully in mrql.env.sh'
+    echo 'HAMA_HOME changed successfully in mrql.env.sh'
 
-echo '--------------- End HAMA Configurations ----------------------'
-echo ' '
+    echo '--------------- End HAMA Configurations ----------------------'
+    echo ' '
 
 }
 
 function executeCommands {
 
-echo ' EXECUTING COMMAND'
-#$MRQL_HOME/bin/mrql.bsp -dist -nodes 50 $MRQL_HOME/queries/pagerank.mrql
+    echo ' EXECUTING COMMAND'
+    #$MRQL_HOME/bin/mrql.bsp -dist -nodes 50 $MRQL_HOME/queries/pagerank.mrql
 
 }
 
