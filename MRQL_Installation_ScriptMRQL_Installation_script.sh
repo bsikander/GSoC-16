@@ -134,20 +134,28 @@ function configureHamaInMRQL {
 
 function executeCommands {
     echo '--------------- Executing PageRank on Hama -------------------'
-    # $1/bin/mrql.bsp -dist -nodes 50 $1/queries/pagerank.mrql
+    $2/bin/hadoop fs -rm tmp/graph.bin*  # Delete existing graph files from bin HDFS
+    
+    echo 'Generating a graph with 100K nodes and 1M edges in HDFS'
+    $1/bin/mrql -dist $1/queries/RMAT.mrql 100000 1000000 # Generate a graph with 100K nodes and 1M edges
+    $1/bin/mrql.bsp -dist -nodes 50 $1/queries/pagerank.mrql
+
+    echo '------------ PageRank execution on Hama complete -------------'
 }
 
 MRQL_INSTALL_FOLDER='/Users/raja/Documents/GSoC/MRQL_Installation_Script/script_test_folder'
 MRQL_HOME=$MRQL_INSTALL_FOLDER'/apache-mrql-0.9.6-incubating'
+
 HDFS_ADDRESS=localhost:54310
+HADOOP_HOME=$HADOOP_PREFIX
 
 downloadMRQL $MRQL_INSTALL_FOLDER
 unzipMRQL $MRQL_INSTALL_FOLDER
 configureJarsRequiredByMRQL
 configureJavaInMRQL $MRQL_HOME $JAVA_HOME
-configureHadoopInMRQL $MRQL_HOME $HADOOP_PREFIX $HDFS_ADDRESS   # Default path of Hadoop should be configured in envirnment variables under HADOOP_PREFIX
+configureHadoopInMRQL $MRQL_HOME $HADOOP_HOME $HDFS_ADDRESS   # Default path of Hadoop should be configured in envirnment variables under HADOOP_PREFIX
 configureHamaInMRQL $MRQL_HOME $HAMA_HOME # Default path of Hama should be configured under HAMA_HOME variable
-executeCommands $MRQL_HOME
+executeCommands $MRQL_HOME $HADOOP_HOME
 
 # LATER on update the spark /flink version
 
