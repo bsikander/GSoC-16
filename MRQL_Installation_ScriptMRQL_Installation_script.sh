@@ -1,33 +1,27 @@
 #/bin/bash
 
-MRQL_INSTALL_FOLDER='/Users/raja/Documents/GSoC/MRQL_Installation_Script/script_test_folder'
+# MRQL_INSTALL_FOLDER='/Users/raja/Documents/GSoC/MRQL_Installation_Script/script_test_folder'
 
-# URL for Apache MRQL tarball download
-MRQL_TARBALL_URL='http://mirrors.ae-online.de/apache/incubator/mrql/apache-mrql-0.9.6-incubating/apache-mrql-0.9.6-incubating-bin.tar.gz'
 MRQL_HOME=$MRQL_INSTALL_FOLDER'/apache-mrql-0.9.6-incubating'
 
 function downloadMRQL {
+    # URL for Apache MRQL tarball download
+    MRQL_TARBALL_URL='http://mirrors.ae-online.de/apache/incubator/mrql/apache-mrql-0.9.6-incubating/apache-mrql-0.9.6-incubating-bin.tar.gz'
 
     # Download the MRQL Tarball to a specific folder
-    # TODO: Checksum required ?
-    wget -P ${MRQL_INSTALL_FOLDER} "${MRQL_TARBALL_URL}"
-
-    #wget "${MRQL_TARBALL_URI}"
-    #wget -P /Users/raja/Documents/GSoC/MRQL_Installation_Script/script_test_folder/  "${MRQL_TARBALL_URI}"
+    # wget -P ${MRQL_INSTALL_FOLDER} "${MRQL_TARBALL_URL}"
+    wget -P $1 $MRQL_TARBALL_URL
 
     download_message='Apache MEQL downloaded successfully at '${MRQL_INSTALL_FOLDER}
     echo $download_message
-    #echo 'Apache MRQL downloaded successfully at' + ${MRQL_INSTALL_FOLDER}
-
 }
 
 function unzipMRQL {
-
     # Unzip the tarball
-    tar xvfz ${MRQL_INSTALL_FOLDER}/apache-mrql-*.tar.gz -C ${MRQL_INSTALL_FOLDER}
+    # tar xvfz ${MRQL_INSTALL_FOLDER}/apache-mrql-*.tar.gz -C ${MRQL_INSTALL_FOLDER}
+    tar xvfz $1/apache-mrql-*.tar.gz -C $1
 
     echo 'File:  unzipped successfully'
-
 }
 
 function configureJarsRequiredByMRQL {
@@ -64,7 +58,6 @@ function configureJarsRequiredByMRQL {
 
     echo '--------------- JAR(s) checking complete ---------------------'
     echo ' '
-
 }
 
 function configureJava {
@@ -73,12 +66,12 @@ function configureJava {
 
     # Replace java home
     JAVA_HOME_TO_REPLACE=/usr/lib/jvm/java-8-oracle
-    sed -i -e 's~'$JAVA_HOME_TO_REPLACE'~'${JAVA_HOME}'~g' $MRQL_HOME/conf/mrql-env.sh
+    # sed -i -e 's~'$JAVA_HOME_TO_REPLACE'~'${JAVA_HOME}'~g' $MRQL_HOME/conf/mrql-env.sh
+    sed -i -e 's~'$JAVA_HOME_TO_REPLACE'~'$2'~g' $1/conf/mrql-env.sh
 
-    echo 'JAVA_HOME changed successfully to '${JAVA_HOME}
+    echo 'JAVA_HOME changed successfully to '$2
 
     echo '--------------- Java modification complete -------------------'
-
 }
 
 function configureHadoopConfigurations {
@@ -90,7 +83,7 @@ function configureHadoopConfigurations {
     # 2- Replace Hadoop home path
     # 3- Replace the namenode URL
 
-    HADOOP_HOME=${HADOOP_PREFIX} # TODO: Find some other way to figure this out
+    HADOOP_HOME=$2 # TODO: Find some other way to figure this out
     HADOOP_VERSION=${HADOOP_HOME##/*/} # Parse the path to get just the version e.g hadoop-2.7.0
     HADOOP_VERSION=${HADOOP_VERSION/hadoop-/} # Parse the word 'hadoop-' from the string to get 2.7.0
 
@@ -99,14 +92,14 @@ function configureHadoopConfigurations {
     HADOOP_VERSION_TO_REPLACE=2.7.1
 
     # Replace the Hadoop version with the version Found on the system
-    sed -i -e "s/$HADOOP_VERSION_TO_REPLACE/$HADOOP_VERSION/g" $MRQL_HOME/conf/mrql-env.sh
+    sed -i -e "s/$HADOOP_VERSION_TO_REPLACE/$HADOOP_VERSION/g" $1/conf/mrql-env.sh
 
     echo 'Hadoop version changed successfully in mrql-env.sh'
 
     # Replace Hadoop Home path
     HADOOP_HOME_REPLACE='${HOME}/hadoop-${HADOOP_VERSION}'
 
-    sed -i -e 's~'$HADOOP_HOME_REPLACE'~'$HADOOP_HOME'~g' $MRQL_HOME/conf/mrql-env.sh
+    sed -i -e 's~'$HADOOP_HOME_REPLACE'~'$HADOOP_HOME'~g' $1/conf/mrql-env.sh
     # sed -i -e "s~$HADOOP_HOME_REPLACE~123~g"
 
     echo 'HADOOP_HOME changed successfully in mrql-env.sh'
@@ -114,7 +107,7 @@ function configureHadoopConfigurations {
     # Replace namenode URL
     DEFAULT_MRQL_FS_DEFAULT_NAME=localhost:9000
     MY_FS_DEFAULT_NAME=localhost:54310 # TODO: Ask what to do
-    sed -i -e "s/$DEFAULT_MRQL_FS_DEFAULT_NAME/$MY_FS_DEFAULT_NAME/g" $MRQL_HOME/conf/mrql-env.sh
+    sed -i -e "s/$DEFAULT_MRQL_FS_DEFAULT_NAME/$MY_FS_DEFAULT_NAME/g" $1/conf/mrql-env.sh
 
     echo 'FS_DEFAULT_NAME changed successfully in mrql.env.sh'
     echo '--------------- Hadoop configurations complete ---------------'
@@ -129,7 +122,7 @@ function configureHamaConfigurations {
     # 1- Replace HAMA_VERSION
     # 2- Replace HAMA_HOME
 
-    HAMA_HOME=${HAMA_HOME} # TODO:
+    HAMA_HOME=$2 # TODO:
     HAMA_VERSION=${HAMA_HOME##/*/} # Parse the path to get the version
     HAMA_VERSION=${HAMA_VERSION/hama-/} # Parse the word 'hama-' from the string to get 0.7.1
 
@@ -138,35 +131,37 @@ function configureHamaConfigurations {
     HAMA_VERSION_TO_REPLACE=0.7.0
 
     # Replace the Hama version with the version found on the system
-    sed -i -e "s/$HAMA_VERSION_TO_REPLACE/$HAMA_VERSION/g" $MRQL_HOME/conf/mrql-env.sh
+    sed -i -e "s/$HAMA_VERSION_TO_REPLACE/$HAMA_VERSION/g" $1/conf/mrql-env.sh
 
     echo 'HAMA_VERSION changed successfully from '$HAMA_VERSION_TO_REPLACE' to '$HAMA_VERSION' in mrql.env.sh'
 
     # Replace Hama home path
     HAMA_HOME_REPLACE='${HOME}/hama-${HAMA_VERSION}'
-    sed -i -e 's~'$HAMA_HOME_REPLACE'~'$HAMA_HOME'~g' $MRQL_HOME/conf/mrql-env.sh
+    sed -i -e 's~'$HAMA_HOME_REPLACE'~'$HAMA_HOME'~g' $1/conf/mrql-env.sh
 
     echo 'HAMA_HOME changed successfully in mrql.env.sh'
 
     echo '--------------- End HAMA Configurations ----------------------'
     echo ' '
-
 }
 
 function executeCommands {
 
-    echo ' EXECUTING COMMAND'
-    #$MRQL_HOME/bin/mrql.bsp -dist -nodes 50 $MRQL_HOME/queries/pagerank.mrql
+    echo '--------------- Executing PageRank on Hama -------------------'
+    # $1/bin/mrql.bsp -dist -nodes 50 $1/queries/pagerank.mrql
 
 }
 
-downloadMRQL
-unzipMRQL
+MRQL_INSTALL_FOLDER='/Users/raja/Documents/GSoC/MRQL_Installation_Script/script_test_folder'
+MRQL_HOME=$MRQL_INSTALL_FOLDER'/apache-mrql-0.9.6-incubating'
+
+downloadMRQL $MRQL_INSTALL_FOLDER
+unzipMRQL $MRQL_INSTALL_FOLDER
 configureJarsRequiredByMRQL
-configureJava
-configureHadoopConfigurations
-configureHamaConfigurations
-executeCommands
+configureJava $MRQL_HOME $JAVA_HOME
+configureHadoopConfigurations $MRQL_HOME $HADOOP_PREFIX # Default path of Hadoop should be configured in envirnment variables under HADOOP_PREFIX
+configureHamaConfigurations $MRQL_HOME $HAMA_HOME # Default path of Hama should be configured under HAMA_HOME variable
+executeCommands $MRQL_HOME
 
 # LATER on update the spark /flink version
 
