@@ -7,7 +7,7 @@ function downloadMRQL {
     # Download the MRQL Tarball to a specific folder
     wget -P $1 $MRQL_TARBALL_URL
 
-    download_message='Apache MEQL downloaded successfully at '$MRQL_INSTALL_FOLDER
+    download_message='=> Apache MEQL downloaded successfully at '$MRQL_INSTALL_FOLDER
     echo $download_message
 }
 
@@ -15,12 +15,12 @@ function unzipMRQL {
     # Unzip the tarball
     tar xvfz $1/apache-mrql-*.tar.gz -C $1
 
-    echo 'File:  unzipped successfully'
+    echo '=> Tarball unzipped successfully'
 }
 
 function configureJarsRequiredByMRQL {
     echo ' '
-    echo '--------------- Checking/Downloading JAR(s) required by MRQL -------------'
+    echo '-------- Checking/Downloading JAR(s) required by MRQL --------'
 
     # Check if java-cup-11a.jar exists
     CUP_JAR_PATH=${HOME}/.m2/repository/net/sf/squirrel-sql/thirdparty/non-maven/java-cup/11a/
@@ -28,10 +28,10 @@ function configureJarsRequiredByMRQL {
 
     if [ -e $CUP_JAR_PATH$CUP_JAR_NAME ]
     then
-        echo $CUP_JAR_NAME" file exists"
+        echo '=> '$CUP_JAR_NAME" file exists"
     else
         CUP_JAR_DOWNLOAD_URL=http://www2.cs.tum.edu/projects/cup/releases/java-cup-11a.jar
-        echo $CUP_JAR_NAME" file is missing. Downloading from http://www2.cs.tum.edu/projects/cup/"
+        echo '=> '$CUP_JAR_NAME" file is missing. Downloading from http://www2.cs.tum.edu/projects/cup/"
         wget -P $CUP_JAR_PATH $CUP_JAR_DOWNLOAD_URL 
     fi
     # end cup jar check
@@ -41,9 +41,9 @@ function configureJarsRequiredByMRQL {
     JLINE_JAR_NAME=jline-1.0.jar
     if [ -e $JLINE_JAR_PATH$JLINE_JAR_NAME ]
     then
-        echo $JLINE_JAR_NAME" file exists"
+        echo '=> '$JLINE_JAR_NAME" file exists"
     else
-        echo $JLINE_JAR_NAME" file is missing. Downloading from http://jline.sourceforge.net"
+        echo '=> '$JLINE_JAR_NAME" file is missing. Downloading from http://jline.sourceforge.net"
         JLINE_JAR_DOWNLOAD_URL=https://sourceforge.net/projects/jline/files/jline/1.0/jline-1.0.zip
         wget -P $JLINE_JAR_PATH "$JLINE_JAR_DOWNLOAD_URL"
     fi
@@ -60,7 +60,7 @@ function configureJavaInMRQL {
     JAVA_HOME_TO_REPLACE=/usr/lib/jvm/java-8-oracle
     sed -i -e 's~'$JAVA_HOME_TO_REPLACE'~'$2'~g' $1/conf/mrql-env.sh
 
-    echo 'JAVA_HOME changed successfully to '$2
+    echo '=> JAVA_HOME changed successfully to '$2
     echo '--------------- Java modification complete -------------------'
 }
 
@@ -76,28 +76,28 @@ function configureHadoopInMRQL {
     HADOOP_VERSION=${HADOOP_HOME##/*/} # Parse the path to get just the version e.g hadoop-2.7.0
     HADOOP_VERSION=${HADOOP_VERSION/hadoop-/} # Parse the word 'hadoop-' from the string to get 2.7.0
 
-    echo 'Hadoop version found : '$HADOOP_VERSION
+    echo '=> Hadoop version found : '$HADOOP_VERSION
 
     HADOOP_VERSION_TO_REPLACE=2.7.1
 
     # Replace the Hadoop version with the version Found on the system
     sed -i -e "s/$HADOOP_VERSION_TO_REPLACE/$HADOOP_VERSION/g" $1/conf/mrql-env.sh
 
-    echo 'Hadoop version changed successfully in mrql-env.sh'
+    echo '=> Hadoop version changed successfully in mrql-env.sh'
 
     # Replace Hadoop Home path
     HADOOP_HOME_REPLACE='${HOME}/hadoop-${HADOOP_VERSION}'
 
     sed -i -e 's~'$HADOOP_HOME_REPLACE'~'$HADOOP_HOME'~g' $1/conf/mrql-env.sh
 
-    echo 'HADOOP_HOME changed successfully in mrql-env.sh'
+    echo '=> HADOOP_HOME changed successfully in mrql-env.sh'
 
     # Replace namenode URL
     DEFAULT_MRQL_FS_DEFAULT_NAME=localhost:9000
     MY_FS_DEFAULT_NAME=$3
     sed -i -e "s/$DEFAULT_MRQL_FS_DEFAULT_NAME/$MY_FS_DEFAULT_NAME/g" $1/conf/mrql-env.sh
 
-    echo 'FS_DEFAULT_NAME changed successfully in mrql.env.sh'
+    echo '=> FS_DEFAULT_NAME changed successfully in mrql.env.sh'
     echo '--------------- Hadoop configurations complete ---------------'
 }
 
@@ -113,20 +113,20 @@ function configureHamaInMRQL {
     HAMA_VERSION=${HAMA_HOME##/*/} # Parse the path to get the version
     HAMA_VERSION=${HAMA_VERSION/hama-/} # Parse the word 'hama-' from the string to get 0.7.1
 
-    echo 'HAMA version found : '$HAMA_VERSION
+    echo '=> HAMA version found : '$HAMA_VERSION
 
     HAMA_VERSION_TO_REPLACE=0.7.0
 
     # Replace the Hama version with the version found on the system
     sed -i -e "s/$HAMA_VERSION_TO_REPLACE/$HAMA_VERSION/g" $1/conf/mrql-env.sh
 
-    echo 'HAMA_VERSION changed successfully from '$HAMA_VERSION_TO_REPLACE' to '$HAMA_VERSION' in mrql.env.sh'
+    echo '=> HAMA_VERSION changed successfully from '$HAMA_VERSION_TO_REPLACE' to '$HAMA_VERSION' in mrql.env.sh'
 
     # Replace Hama home path
     HAMA_HOME_REPLACE='${HOME}/hama-${HAMA_VERSION}'
     sed -i -e 's~'$HAMA_HOME_REPLACE'~'$HAMA_HOME'~g' $1/conf/mrql-env.sh
 
-    echo 'HAMA_HOME changed successfully in mrql.env.sh'
+    echo '=> HAMA_HOME changed successfully in mrql.env.sh'
 
     echo '--------------- End HAMA Configurations ----------------------'
     echo ' '
@@ -136,9 +136,31 @@ function executeCommands {
     echo '--------------- Executing PageRank on Hama -------------------'
     $2/bin/hadoop fs -rm tmp/graph.bin*  # Delete existing graph files from bin HDFS
     
-    echo 'Generating a graph with 100K nodes and 1M edges in HDFS'
-    $1/bin/mrql -dist $1/queries/RMAT.mrql 100000 1000000 # Generate a graph with 100K nodes and 1M edges
-    $1/bin/mrql.bsp -dist -nodes 50 $1/queries/pagerank.mrql
+    echo ' '
+    echo '=> Deleting tmp/graph.bin from HDFS'
+    echo ' '
+
+    echo ' '
+    echo '=> Generating a graph with 10K nodes and 100K edges in HDFS'
+    echo ' '
+
+    $1/bin/mrql -dist $1/queries/RMAT.mrql 10000 100000 # Generate a graph with 100K nodes and 1M edges
+    # $1/bin/mrql.bsp -dist -nodes 50 $1/queries/pagerank.mrql
+    
+    echo ' '
+    echo '=> Running the PageRank algorithm'
+    echo ' '
+
+    OUTPUT="$($1/bin/mrql.bsp -dist -nodes 50 $1/queries/pagerank.mrql)"
+    # echo 'The Total RunTime of PageRank on Hama is: '"${OUTPUT##*RunTime: }"
+    # echo $OUTPUT
+    
+    echo ' '
+    echo '=> The Total Runtime of PageRank on Hama is : '"${OUTPUT##*Run time: }"
+    echo ' '
+    #test='RunTime: 126.71 sec RunTime: 200.123 sec'
+    #echo "${test##*RunTime: }"
+    #echo "${OUTPUT:$i:1}"
 
     echo '------------ PageRank execution on Hama complete -------------'
 }
