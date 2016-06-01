@@ -134,11 +134,12 @@ function configureHamaInMRQL {
 
 function executeCommands {
     echo '--------------- Executing PageRank on Hama -------------------'
+   
+    echo ' '
+    echo '=> Deleting tmp/graph.bin* from HDFS'
+    echo ' '
+
     $2/bin/hadoop fs -rm tmp/graph.bin*  # Delete existing graph files from bin HDFS
-    
-    echo ' '
-    echo '=> Deleting tmp/graph.bin from HDFS'
-    echo ' '
 
     echo ' '
     echo '=> Generating a graph with 10K nodes and 100K edges in HDFS'
@@ -152,15 +153,10 @@ function executeCommands {
     echo ' '
 
     OUTPUT="$($1/bin/mrql.bsp -dist -nodes 50 $1/queries/pagerank.mrql)"
-    # echo 'The Total RunTime of PageRank on Hama is: '"${OUTPUT##*RunTime: }"
-    # echo $OUTPUT
     
     echo ' '
     echo '=> The Total Runtime of PageRank on Hama is : '"${OUTPUT##*Run time: }"
     echo ' '
-    #test='RunTime: 126.71 sec RunTime: 200.123 sec'
-    #echo "${test##*RunTime: }"
-    #echo "${OUTPUT:$i:1}"
 
     echo '------------ PageRank execution on Hama complete -------------'
 }
