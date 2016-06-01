@@ -1,31 +1,24 @@
 #/bin/bash
 
-# MRQL_INSTALL_FOLDER='/Users/raja/Documents/GSoC/MRQL_Installation_Script/script_test_folder'
-
-MRQL_HOME=$MRQL_INSTALL_FOLDER'/apache-mrql-0.9.6-incubating'
-
 function downloadMRQL {
     # URL for Apache MRQL tarball download
     MRQL_TARBALL_URL='http://mirrors.ae-online.de/apache/incubator/mrql/apache-mrql-0.9.6-incubating/apache-mrql-0.9.6-incubating-bin.tar.gz'
 
     # Download the MRQL Tarball to a specific folder
-    # wget -P ${MRQL_INSTALL_FOLDER} "${MRQL_TARBALL_URL}"
     wget -P $1 $MRQL_TARBALL_URL
 
-    download_message='Apache MEQL downloaded successfully at '${MRQL_INSTALL_FOLDER}
+    download_message='Apache MEQL downloaded successfully at '$MRQL_INSTALL_FOLDER
     echo $download_message
 }
 
 function unzipMRQL {
     # Unzip the tarball
-    # tar xvfz ${MRQL_INSTALL_FOLDER}/apache-mrql-*.tar.gz -C ${MRQL_INSTALL_FOLDER}
     tar xvfz $1/apache-mrql-*.tar.gz -C $1
 
     echo 'File:  unzipped successfully'
 }
 
 function configureJarsRequiredByMRQL {
-
     echo ' '
     echo '--------------- Checking/Downloading JAR(s) required by MRQL -------------'
 
@@ -39,7 +32,7 @@ function configureJarsRequiredByMRQL {
     else
         CUP_JAR_DOWNLOAD_URL=http://www2.cs.tum.edu/projects/cup/releases/java-cup-11a.jar
         echo $CUP_JAR_NAME" file is missing. Downloading from http://www2.cs.tum.edu/projects/cup/"
-        wget -P $CUP_JAR_PATH "${CUP_JAR_DOWNLOAD_URL}" 
+        wget -P $CUP_JAR_PATH $CUP_JAR_DOWNLOAD_URL 
     fi
     # end cup jar check
 
@@ -48,11 +41,11 @@ function configureJarsRequiredByMRQL {
     JLINE_JAR_NAME=jline-1.0.jar
     if [ -e $JLINE_JAR_PATH$JLINE_JAR_NAME ]
     then
-        echo ${JLINE_JAR_NAME}" file exists"
+        echo $JLINE_JAR_NAME" file exists"
     else
-        echo ${JLINE_JAR_NAME}" file is missing. Downloading from http://jline.sourceforge.net"
+        echo $JLINE_JAR_NAME" file is missing. Downloading from http://jline.sourceforge.net"
         JLINE_JAR_DOWNLOAD_URL=https://sourceforge.net/projects/jline/files/jline/1.0/jline-1.0.zip
-        wget -P $JLINE_JAR_PATH "${JLINE_JAR_DOWNLOAD_URL}"
+        wget -P $JLINE_JAR_PATH "$JLINE_JAR_DOWNLOAD_URL"
     fi
     # end jline check
 
@@ -61,21 +54,17 @@ function configureJarsRequiredByMRQL {
 }
 
 function configureJava {
-
     echo '--------------- Modifying Java -------------------------------'
 
     # Replace java home
     JAVA_HOME_TO_REPLACE=/usr/lib/jvm/java-8-oracle
-    # sed -i -e 's~'$JAVA_HOME_TO_REPLACE'~'${JAVA_HOME}'~g' $MRQL_HOME/conf/mrql-env.sh
     sed -i -e 's~'$JAVA_HOME_TO_REPLACE'~'$2'~g' $1/conf/mrql-env.sh
 
     echo 'JAVA_HOME changed successfully to '$2
-
     echo '--------------- Java modification complete -------------------'
 }
 
 function configureHadoopConfigurations {
-    
     echo ' '
     echo '--------------- Starting Hadoop Configurations ---------------'
 
@@ -87,7 +76,7 @@ function configureHadoopConfigurations {
     HADOOP_VERSION=${HADOOP_HOME##/*/} # Parse the path to get just the version e.g hadoop-2.7.0
     HADOOP_VERSION=${HADOOP_VERSION/hadoop-/} # Parse the word 'hadoop-' from the string to get 2.7.0
 
-    echo 'Hadoop version found : '${HADOOP_VERSION}
+    echo 'Hadoop version found : '$HADOOP_VERSION
 
     HADOOP_VERSION_TO_REPLACE=2.7.1
 
@@ -100,13 +89,12 @@ function configureHadoopConfigurations {
     HADOOP_HOME_REPLACE='${HOME}/hadoop-${HADOOP_VERSION}'
 
     sed -i -e 's~'$HADOOP_HOME_REPLACE'~'$HADOOP_HOME'~g' $1/conf/mrql-env.sh
-    # sed -i -e "s~$HADOOP_HOME_REPLACE~123~g"
 
     echo 'HADOOP_HOME changed successfully in mrql-env.sh'
 
     # Replace namenode URL
     DEFAULT_MRQL_FS_DEFAULT_NAME=localhost:9000
-    MY_FS_DEFAULT_NAME=localhost:54310 # TODO: Ask what to do
+    MY_FS_DEFAULT_NAME=$3
     sed -i -e "s/$DEFAULT_MRQL_FS_DEFAULT_NAME/$MY_FS_DEFAULT_NAME/g" $1/conf/mrql-env.sh
 
     echo 'FS_DEFAULT_NAME changed successfully in mrql.env.sh'
@@ -115,14 +103,13 @@ function configureHadoopConfigurations {
 
 
 function configureHamaConfigurations {
-
     echo ' '
     echo '--------------- Starting HAMA Configurations -----------------'
 
     # 1- Replace HAMA_VERSION
     # 2- Replace HAMA_HOME
 
-    HAMA_HOME=$2 # TODO:
+    HAMA_HOME=$2
     HAMA_VERSION=${HAMA_HOME##/*/} # Parse the path to get the version
     HAMA_VERSION=${HAMA_VERSION/hama-/} # Parse the word 'hama-' from the string to get 0.7.1
 
@@ -146,20 +133,19 @@ function configureHamaConfigurations {
 }
 
 function executeCommands {
-
     echo '--------------- Executing PageRank on Hama -------------------'
     # $1/bin/mrql.bsp -dist -nodes 50 $1/queries/pagerank.mrql
-
 }
 
 MRQL_INSTALL_FOLDER='/Users/raja/Documents/GSoC/MRQL_Installation_Script/script_test_folder'
 MRQL_HOME=$MRQL_INSTALL_FOLDER'/apache-mrql-0.9.6-incubating'
+HDFS_ADDRESS=localhost:54310
 
 downloadMRQL $MRQL_INSTALL_FOLDER
 unzipMRQL $MRQL_INSTALL_FOLDER
 configureJarsRequiredByMRQL
 configureJava $MRQL_HOME $JAVA_HOME
-configureHadoopConfigurations $MRQL_HOME $HADOOP_PREFIX # Default path of Hadoop should be configured in envirnment variables under HADOOP_PREFIX
+configureHadoopConfigurations $MRQL_HOME $HADOOP_PREFIX $HDFS_ADDRESS   # Default path of Hadoop should be configured in envirnment variables under HADOOP_PREFIX
 configureHamaConfigurations $MRQL_HOME $HAMA_HOME # Default path of Hama should be configured under HAMA_HOME variable
 executeCommands $MRQL_HOME
 
