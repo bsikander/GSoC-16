@@ -53,7 +53,7 @@ function configureJarsRequiredByMRQL {
     echo ' '
 }
 
-function configureJava {
+function configureJavaInMRQL {
     echo '--------------- Modifying Java -------------------------------'
 
     # Replace java home
@@ -64,7 +64,7 @@ function configureJava {
     echo '--------------- Java modification complete -------------------'
 }
 
-function configureHadoopConfigurations {
+function configureHadoopInMRQL {
     echo ' '
     echo '--------------- Starting Hadoop Configurations ---------------'
 
@@ -102,7 +102,7 @@ function configureHadoopConfigurations {
 }
 
 
-function configureHamaConfigurations {
+function configureHamaInMRQL {
     echo ' '
     echo '--------------- Starting HAMA Configurations -----------------'
 
@@ -144,9 +144,9 @@ HDFS_ADDRESS=localhost:54310
 downloadMRQL $MRQL_INSTALL_FOLDER
 unzipMRQL $MRQL_INSTALL_FOLDER
 configureJarsRequiredByMRQL
-configureJava $MRQL_HOME $JAVA_HOME
-configureHadoopConfigurations $MRQL_HOME $HADOOP_PREFIX $HDFS_ADDRESS   # Default path of Hadoop should be configured in envirnment variables under HADOOP_PREFIX
-configureHamaConfigurations $MRQL_HOME $HAMA_HOME # Default path of Hama should be configured under HAMA_HOME variable
+configureJavaInMRQL $MRQL_HOME $JAVA_HOME
+configureHadoopInMRQL $MRQL_HOME $HADOOP_PREFIX $HDFS_ADDRESS   # Default path of Hadoop should be configured in envirnment variables under HADOOP_PREFIX
+configureHamaInMRQL $MRQL_HOME $HAMA_HOME # Default path of Hama should be configured under HAMA_HOME variable
 executeCommands $MRQL_HOME
 
 # LATER on update the spark /flink version
