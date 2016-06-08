@@ -233,7 +233,7 @@ downloadMRQL $MRQL_INSTALL_FOLDER
 unzipMRQL $MRQL_INSTALL_FOLDER
 configureJarsRequiredByMRQL
 configureJavaInMRQL $MRQL_HOME $JAVA_HOME
-configureHadoopInMRQL $MRQL_HOME $HADOOP_HOME $HDFS_ADDRESS   # Default path of Hadoop should be configured in envirnment variables under HADOOP_PREFIX
+configureHadoopInMRQL $MRQL_HOME $HADOOP_HOME $HDFS_ADDRESS   # Default path of Hadoop should be configured in envirnment variables under HADOOP_HOME
 configureHamaInMRQL $MRQL_HOME $HAMA_HOME # Default path of Hama should be configured under HAMA_HOME variable
 configureSparkInMRQL $MRQL_HOME $SPARK_HOME $SPARK_MASTER
 configureFlinkInMRQL $MRQL_HOME $FLINK_HOME
