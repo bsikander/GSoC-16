@@ -84,17 +84,12 @@ function configureHadoopInMRQL {
     # 2- Replace Hadoop home path
     # 3- Replace the namenode URL
 
-    #HADOOP_HOME=$2 # TODO: Find some other way to figure this out
-    #HADOOP_VERSION=${HADOOP_HOME##/*/} # Parse the path to get just the version e.g hadoop-2.7.0
-    #HADOOP_VERSION=${HADOOP_VERSION/hadoop-/} # Parse the word 'hadoop-' from the string to get 2.7.0
-    
     local HADOOP_VERSION=$(getVersionFromName $2)
     echo '=> Hadoop version found : '$HADOOP_VERSION
 
     local HADOOP_VERSION_TO_REPLACE=2.7.1
 
     # Replace the Hadoop version with the version Found on the system
-    # sed -i -e "s/$HADOOP_VERSION_TO_REPLACE/$HADOOP_VERSION/g" $1/conf/mrql-env.sh
     searchAndReplace $1 $HADOOP_VERSION_TO_REPLACE $HADOOP_VERSION
 
     echo '=> Hadoop version changed successfully in mrql-env.sh'
@@ -102,14 +97,12 @@ function configureHadoopInMRQL {
     # Replace Hadoop Home path
     local HADOOP_HOME_REPLACE='${HOME}/hadoop-${HADOOP_VERSION}'
     searchAndReplace $1 $HADOOP_HOME_REPLACE $HADOOP_HOME
-    #sed -i -e 's~'$HADOOP_HOME_REPLACE'~'$HADOOP_HOME'~g' $1/conf/mrql-env.sh
 
     echo '=> HADOOP_HOME changed successfully in mrql-env.sh'
 
     # Replace namenode URL
     local DEFAULT_MRQL_FS_DEFAULT_NAME=localhost:9000
     local MY_FS_DEFAULT_NAME=$3
-    #sed -i -e "s/$DEFAULT_MRQL_FS_DEFAULT_NAME/$MY_FS_DEFAULT_NAME/g" $1/conf/mrql-env.sh
     searchAndReplace $1 $DEFAULT_MRQL_FS_DEFAULT_NAME $MY_FS_DEFAULT_NAME
 
     echo '=> FS_DEFAULT_NAME changed successfully in mrql.env.sh'
@@ -125,23 +118,17 @@ function configureHamaInMRQL {
     # 2- Replace HAMA_HOME
 
     local HAMA_VERSION=$(getVersionFromName $2)
-    # HAMA_HOME=$2
-    # HAMA_VERSION=${HAMA_HOME##/*/} # Parse the path to get the version
-    # HAMA_VERSION=${HAMA_VERSION/hama-/} # Parse the word 'hama-' from the string to get 0.7.1
-
     echo '=> HAMA version found : '$HAMA_VERSION
 
     local HAMA_VERSION_TO_REPLACE=0.7.0
 
     # Replace the Hama version with the version found on the system
-    #sed -i -e "s/$HAMA_VERSION_TO_REPLACE/$HAMA_VERSION/g" $1/conf/mrql-env.sh
     searchAndReplace $1 $HAMA_VERSION_TO_REPLACE $HAMA_VERSION
 
     echo '=> HAMA_VERSION changed successfully from '$HAMA_VERSION_TO_REPLACE' to '$HAMA_VERSION' in mrql.env.sh'
 
     # Replace Hama home path
     local HAMA_HOME_REPLACE='${HOME}/hama-${HAMA_VERSION}'
-    #sed -i -e 's~'$HAMA_HOME_REPLACE'~'$HAMA_HOME'~g' $1/conf/mrql-env.sh
     searchAndReplace $1 $HAMA_HOME_REPLACE $HAMA_HOME
 
     echo '=> HAMA_HOME changed successfully in mrql.env.sh'
@@ -158,13 +145,9 @@ function configureSparkInMRQL {
     echo '=> SPARK found : '$SPARK_HOME
     
     local SPARK_HOME_TO_REPLACE='${HOME}/spark-1.6.0-bin-hadoop2.6'
-    #sed -i -e 's~'$SPARK_HOME_TO_REPLACE'~'$SPARK_HOME'~g' $1/conf/mrql-env.sh
     searchAndReplace $1 $SPARK_HOME_TO_REPLACE $SPARK_HOME
 
     echo '=> SPARK_MASTER -> '$3
-
-    # Spark master
-    # sed -i -e 's~SPARK_MASTER=yarn-client~SPARK_MASTER='$3'~g' $1/conf/mrql-env.sh
     searchAndReplace $1 'SPARK_MASTER=yarn-client' 'SPARK_MASTER='$3
     
     echo ' '
@@ -174,25 +157,19 @@ function configureSparkInMRQL {
 function configureFlinkInMRQL {
     echo ' '
     echo '---------------- Starting FLINK Configurations ---------------'
-
-    # FLINK_HOME=$2
-    # FLINK_VERSION=${FLINK_HOME##/*/} # Parse the path to get the version
-    # FLINK_VERSION=${FLINK_VERSION/flink-/} # Parse the word 'hama-' from the string to get 0.7.1
-              
+          
     local FLINK_VERSION=$(getVersionFromName $2)
     echo '=> FLINK version found : '$FLINK_VERSION
                    
     FLINK_VERSION_TO_REPLACE=0.10.2
                         
     # Replace the Hama version with the version found on the system
-    # sed -i -e "s/$FLINK_VERSION_TO_REPLACE/$FLINK_VERSION/g" $1/conf/mrql-env.sh
     searchAndReplace $1 $FLINK_VERSION_TO_REPLACE $FLINK_VERSION  
 
     echo '=> FLINK_VERSION changed successfully from '$FLINK_VERSION_TO_REPLACE' to '$FLINK_VERSION' in mrql.env.sh'
                                        
     # Replace Flink home path
     local FLINK_HOME_REPLACE='${HOME}/flink-${FLINK_VERSION}'
-    # sed -i -e 's~'$FLINK_HOME_REPLACE'~'$FLINK_HOME'~g' $1/conf/mrql-env.sh
     searchAndReplace $1 $FLINK_HOME_REPLACE $FLINK_HOME      
 
     echo '=> FLINK_HOME changed successfully in mrql.env.sh'
@@ -228,52 +205,28 @@ function performBenchmark {
     echo ' '
 
     $1/bin/mrql -dist $1/queries/RMAT.mrql 10000 100000 # Generate a graph with 100K nodes and 1M edges
-    # $1/bin/mrql.bsp -dist -nodes 50 $1/queries/pagerank.mrql
-    
+
     echo ' '
     echo '=> Running the PageRank algorithm'
     echo ' '
 
-    # Hadoop Page Rank
-    # OUTPUT="$($1/bin/mrql -dist -nodes 50 $1/queries/pagerank.mrql)"
-    # echo ' '
-    # echo '=> The Total Runtime of PageRank on Hadoop is : '"${OUTPUT##*Run time: }"
-    # echo ' '
-    executeCommand $1 'mrql' 50 'pagerank.mrql'
-    
-
-    # Hama Page Rank
-    # OUTPUT="$($1/bin/mrql.bsp -dist -nodes 50 $1/queries/pagerank.mrql)"
-    
-    # echo ' '
-    # echo '=> The Total Runtime of PageRank on Hama is : '"${OUTPUT##*Run time: }"
-    # echo ' '
-    executeCommand $1 'mrql.bsp' 50 'pagerank.mrql' 
-    executeCommand $1 'mrql.spark' 50 'pagerank.mrql'
-    executeCommand $1 'mrql.flink' 50 'pagerank.mrql'
-    
-    # Spark Page Rank
-    # OUTPUT="$($1/bin/mrql.spark -dist -nodes 4 $1/queries/pagerank.mrql)"
-    
-    # echo ' '
-    # echo '=> The Total Runtime of PageRank on Spark is : '"${OUTPUT##*Run time: }"
-    # echo ' '
-
-    # FLINK Page Rank
-    #OUTPUT="$($1/bin/mrql.flink -dist -nodes 50 $1/queries/pagerank.mrql)"
-    
-    #echo ' '
-    #echo '=> The Total Runtime of PageRank on Flink is : '"${OUTPUT##*Run time: }"
-    #echo ' '
+    executeCommand $1 'mrql' $3 'pagerank.mrql' # Run page rank on Hadoop using 4 reducers
+    executeCommand $1 'mrql.bsp' $3 'pagerank.mrql' # Run page rank on Hama using 4 BSP workers
+    executeCommand $1 'mrql.spark' $3 'pagerank.mrql' # Run page rank on Spark using 4 Slave workers
+    executeCommand $1 'mrql.flink' $3 'pagerank.mrql' # Run page rank on Flink using 4 flink workers
 
     echo '------------ PageRank execution on Hama complete -------------'
 }
 
+# => Following properties need to be configured to the execution of script
 MRQL_INSTALL_FOLDER='/Users/raja/Documents/GSoC/MRQL_Installation_Script/script_test_folder'
 MRQL_HOME=$MRQL_INSTALL_FOLDER'/apache-mrql-0.9.6-incubating'
-
 HDFS_ADDRESS=localhost:54310
-HADOOP_HOME=$HADOOP_PREFIX
+SPARK_MASTER=spark://127.0.0.1:7077
+MRQL_NODES=4
+
+# Note: Currently only executes PageRank algorithm
+# => End
 
 getVersionFromName $HAMA_HOME
 downloadMRQL $MRQL_INSTALL_FOLDER
@@ -282,9 +235,9 @@ configureJarsRequiredByMRQL
 configureJavaInMRQL $MRQL_HOME $JAVA_HOME
 configureHadoopInMRQL $MRQL_HOME $HADOOP_HOME $HDFS_ADDRESS   # Default path of Hadoop should be configured in envirnment variables under HADOOP_PREFIX
 configureHamaInMRQL $MRQL_HOME $HAMA_HOME # Default path of Hama should be configured under HAMA_HOME variable
-configureSparkInMRQL $MRQL_HOME $SPARK_HOME "spark://127.0.0.1:7077"
+configureSparkInMRQL $MRQL_HOME $SPARK_HOME $SPARK_MASTER
 configureFlinkInMRQL $MRQL_HOME $FLINK_HOME
-performBenchmark $MRQL_HOME $HADOOP_HOME
+performBenchmark $MRQL_HOME $HADOOP_HOME $MRQL_NODES
 
 # LATER on update the spark /flink version
 
