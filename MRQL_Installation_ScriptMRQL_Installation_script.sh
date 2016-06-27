@@ -218,6 +218,63 @@ function performBenchmark {
     echo '------------ PageRank execution on Hama complete -------------'
 }
 
+function outputBenchmarkResult {
+    echo '----------------- Writing benchmark results ----------------'
+
+cat > result.html <<- _EOF_
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+         <title>Bechmark of Hama against Flink and Spark</title>
+    </head>
+
+    <body>
+        <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+        <div id="chart_div"></div>
+
+        <script type='text/javascript'>//<![CDATA[
+        google.charts.load('current', {packages: ['corechart', 'bar']});
+        google.charts.setOnLoadCallback(drawRightY);
+        
+        function drawRightY() {
+                 var data = google.visualization.arrayToDataTable([
+                                            ['Platform', 'Hama', 'Spark', 'Flink'],
+                                            ['Page Rank', 10, 15, 20],
+                                            ['Word Count', 7, 3, 10],
+                                        ]);
+                var options = {
+                                chart: {
+                                    title: 'Page Rank Algorithm Benchmark',
+                                    subtitle: 'Based on the results collected from Apache MRQL'
+                                },
+                                hAxis: {
+                                    title: 'Total Time',
+                                    minValue: 0,
+                                },
+                                vAxis: {
+                                    title: 'Algorithm'
+                                },
+                                bars: 'horizontal',
+                                axes: {
+                                        y: {
+                                             0: {side: 'right'}
+                                        }
+                                }
+                            };
+                            
+                            var material = new google.charts.Bar(document.getElementById('chart_div'));
+                            material.draw(data, options);
+        }
+                                                                                                                                                                                                                                                                                 //]]>
+                                                                                                                                                                                                                                                                                 </script>
+</body>
+</html>
+
+_EOF_
+}
+
 # => Following properties need to be configured to the execution of script
 MRQL_INSTALL_FOLDER='/Users/raja/Documents/GSoC/MRQL_Installation_Script/script_test_folder'
 MRQL_HOME=$MRQL_INSTALL_FOLDER'/apache-mrql-0.9.6-incubating'
@@ -228,16 +285,18 @@ MRQL_NODES=4
 # Note: Currently only executes PageRank algorithm
 # => End
 
-getVersionFromName $HAMA_HOME
-downloadMRQL $MRQL_INSTALL_FOLDER
-unzipMRQL $MRQL_INSTALL_FOLDER
-configureJarsRequiredByMRQL
-configureJavaInMRQL $MRQL_HOME $JAVA_HOME
-configureHadoopInMRQL $MRQL_HOME $HADOOP_HOME $HDFS_ADDRESS   # Default path of Hadoop should be configured in envirnment variables under HADOOP_HOME
-configureHamaInMRQL $MRQL_HOME $HAMA_HOME # Default path of Hama should be configured under HAMA_HOME variable
-configureSparkInMRQL $MRQL_HOME $SPARK_HOME $SPARK_MASTER
-configureFlinkInMRQL $MRQL_HOME $FLINK_HOME
-performBenchmark $MRQL_HOME $HADOOP_HOME $MRQL_NODES
+outputBenchmarkResult
+
+#getVersionFromName $HAMA_HOME
+#downloadMRQL $MRQL_INSTALL_FOLDER
+#unzipMRQL $MRQL_INSTALL_FOLDER
+#configureJarsRequiredByMRQL
+#configureJavaInMRQL $MRQL_HOME $JAVA_HOME
+#configureHadoopInMRQL $MRQL_HOME $HADOOP_HOME $HDFS_ADDRESS   # Default path of Hadoop should be configured in envirnment variables under HADOOP_HOME
+#configureHamaInMRQL $MRQL_HOME $HAMA_HOME # Default path of Hama should be configured under HAMA_HOME variable
+#configureSparkInMRQL $MRQL_HOME $SPARK_HOME $SPARK_MASTER
+#configureFlinkInMRQL $MRQL_HOME $FLINK_HOME
+#performBenchmark $MRQL_HOME $HADOOP_HOME $MRQL_NODES
 
 # LATER on update the spark /flink version
 
