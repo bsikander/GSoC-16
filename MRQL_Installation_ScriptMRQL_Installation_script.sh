@@ -185,10 +185,22 @@ function configureFlinkInMRQL {
 # $4 -> Algorithm to execute
 function executeCommand {
     # Hadoop Page Rank
-    OUTPUT="$($1/bin/$2 -dist -nodes $3 $1/queries/$4)"
+    COMMAND="$($1/bin/$2 -dist -nodes $3 $1/queries/$4)"
     echo ' '
-    echo '=> The Total Runtime of '$4' on '$2' is : '"${OUTPUT##*Run time: }"
+    #echo '=> The Total Runtime of '$4' on '$2' is : '"${OUTPUT##*Run time: }"
+    
+    local output="${COMMAND##*Run time: }" # Execute the command
+
+    local replace=" secs"
+    local replace_with=" "
+    output="${output//$replace/$replace_with}"
+
+    echo '=> The Total Runtime of '$4' on '$2' is : '$output
     echo ' '
+
+    local resultvar=$5
+    local result=$output
+    eval $resultvar="'$result'"
 }
 
 function performBenchmark {
@@ -210,16 +222,20 @@ function performBenchmark {
     echo '=> Running the PageRank algorithm'
     echo ' '
 
-    executeCommand $1 'mrql' $3 'pagerank.mrql' # Run page rank on Hadoop using 4 reducers
-    executeCommand $1 'mrql.bsp' $3 'pagerank.mrql' # Run page rank on Hama using 4 BSP workers
-    executeCommand $1 'mrql.spark' $3 'pagerank.mrql' # Run page rank on Spark using 4 Slave workers
-    executeCommand $1 'mrql.flink' $3 'pagerank.mrql' # Run page rank on Flink using 4 flink workers
+    executeCommand $1 'mrql' $3 'pagerank.mrql' output_hadoop # Run page rank on Hadoop using 4 reducers
+    executeCommand $1 'mrql.bsp' $3 'pagerank.mrql' output_hama # Run page rank on Hama using 4 BSP workers
+    executeCommand $1 'mrql.spark' $3 'pagerank.mrql' output_spark # Run page rank on Spark using 4 Slave workers
+    executeCommand $1 'mrql.flink' $3 'pagerank.mrql' output_flink # Run page rank on Flink using 4 flink workers
 
     echo '------------ PageRank execution on Hama complete -------------'
+
+    outputBenchmarkResult $output_hadoop $output_hama $output_spark $output_flink
 }
 
 function outputBenchmarkResult {
     echo '----------------- Writing benchmark results ----------------'
+
+echo $1 $2 $3 $4
 
 cat > result.html <<- _EOF_
 
@@ -240,9 +256,9 @@ cat > result.html <<- _EOF_
         
         function drawRightY() {
                  var data = google.visualization.arrayToDataTable([
-                                            ['Platform', 'Hama', 'Spark', 'Flink'],
-                                            ['Page Rank', 10, 15, 20],
-                                            ['Word Count', 7, 3, 10],
+                                            ['Platform', 'Hadoop', 'Hama', 'Spark', 'Flink'],
+                                            ['Page Rank', $1,$2, $3, 20],
+                                            ['Word Count', 7,7, 3, 10],
                                         ]);
                 var options = {
                                 chart: {
@@ -275,6 +291,12 @@ cat > result.html <<- _EOF_
 _EOF_
 }
 
+function testOutput {
+    local  result=$1
+    local  myresult='some value'
+    eval $result="'$myresult'"
+}
+
 # => Following properties need to be configured to the execution of script
 MRQL_INSTALL_FOLDER='/Users/raja/Documents/GSoC/MRQL_Installation_Script/script_test_folder'
 MRQL_HOME=$MRQL_INSTALL_FOLDER'/apache-mrql-0.9.6-incubating'
@@ -285,18 +307,20 @@ MRQL_NODES=4
 # Note: Currently only executes PageRank algorithm
 # => End
 
-outputBenchmarkResult
+testOutput result_output
+echo $result_output
+#outputBenchmarkResult
 
-#getVersionFromName $HAMA_HOME
-#downloadMRQL $MRQL_INSTALL_FOLDER
-#unzipMRQL $MRQL_INSTALL_FOLDER
-#configureJarsRequiredByMRQL
-#configureJavaInMRQL $MRQL_HOME $JAVA_HOME
-#configureHadoopInMRQL $MRQL_HOME $HADOOP_HOME $HDFS_ADDRESS   # Default path of Hadoop should be configured in envirnment variables under HADOOP_HOME
-#configureHamaInMRQL $MRQL_HOME $HAMA_HOME # Default path of Hama should be configured under HAMA_HOME variable
-#configureSparkInMRQL $MRQL_HOME $SPARK_HOME $SPARK_MASTER
+getVersionFromName $HAMA_HOME
+downloadMRQL $MRQL_INSTALL_FOLDER
+unzipMRQL $MRQL_INSTALL_FOLDER
+configureJarsRequiredByMRQL
+configureJavaInMRQL $MRQL_HOME $JAVA_HOME
+configureHadoopInMRQL $MRQL_HOME $HADOOP_HOME $HDFS_ADDRESS   # Default path of Hadoop should be configured in envirnment variables under HADOOP_HOME
+configureHamaInMRQL $MRQL_HOME $HAMA_HOME # Default path of Hama should be configured under HAMA_HOME variable
+configureSparkInMRQL $MRQL_HOME $SPARK_HOME $SPARK_MASTER
 #configureFlinkInMRQL $MRQL_HOME $FLINK_HOME
-#performBenchmark $MRQL_HOME $HADOOP_HOME $MRQL_NODES
+performBenchmark $MRQL_HOME $HADOOP_HOME $MRQL_NODES
 
 # LATER on update the spark /flink version
 
