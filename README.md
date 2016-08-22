@@ -1,1 +1,6 @@
 # GSoC-16
+This purpose of this repository is to show the work done during the Google Summer of Code project. The main task was to perform a benchmark of Apache Hama against Spark and Flink. For the purpose, we decided to go with Apache MRQL which is a query processing engine on top of Hadoop, Hama, Spark and Flink. In order to acheive this, all of these platforms were configured on a local machine to test the working of MRQL for benchmarking. Once it was complete, a bash script was created "MRQL_Installation_Script.sh". The purpose of this script was to automatically read the Hadoop, Spark, Hama and Flink installations on a cluster and use them to configure Apache MRQL. Once MRQL was configured bechmark is performed and output is written to an HTML file which displays the results in a graph.
+
+Due to limited cluster resources, the script is not completly tested on a cluster and currently on performs a benchmark of PageRank algorithm. As soon as the cluster is arranged, the benchmark will be completed.
+
+In the end during this summer of code, I learnt Apache Spark, Flink, Hadoop and MRQL. I also got to understand Apache Ambari for easy configuration and monitoring of a cluster running all of the above systems. Overall it was a good learning experience. 
